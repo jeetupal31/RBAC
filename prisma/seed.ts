@@ -36,6 +36,35 @@ async function main() {
   });
 
   console.log("✅ Admin role & permissions seeded");
+
+  // Create default Admin user
+  const hashedPassword = await import("bcrypt").then(m => m.hash("password", 10));
+
+  const user = await prisma.user.upsert({
+    where: { email: "admin@example.com" },
+    update: {},
+    create: {
+      email: "admin@example.com",
+      password: hashedPassword,
+    },
+  });
+
+  // Assign Admin role to user
+  await prisma.userRole.upsert({
+    where: {
+      userId_roleId: {
+        userId: user.id,
+        roleId: admin.id,
+      },
+    },
+    update: {},
+    create: {
+      userId: user.id,
+      roleId: admin.id,
+    },
+  });
+
+  console.log("✅ Default Admin user seeded: admin@example.com / password");
 }
 
 main()
