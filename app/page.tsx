@@ -23,15 +23,15 @@ export default function Home() {
               RBAC Admin
             </span>
           </div>
-          
+
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-6">
             Role-Based Access Control
           </h1>
-          
+
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
             Securely manage users, roles, and permissions with an intuitive admin dashboard.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/login"
