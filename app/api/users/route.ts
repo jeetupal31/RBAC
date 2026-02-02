@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     // Safest bet for now: check if user has "manage_roles" which Admins have, 
     // OR just checking if they are logged in and have some admin capabilities. 
     // Let's stick to "manage_roles" for now as a proxy for "Admin" access until we update seed.)
-    const allowed = await hasPermission(user.userId, "manage_roles"); 
+    const allowed = await hasPermission(user.userId, "manage_users");
     if (!allowed) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const allowed = await hasPermission(user.userId, "manage_roles");
+    const allowed = await hasPermission(user.userId, "manage_users");
     if (!allowed) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
@@ -104,9 +104,9 @@ export async function POST(req: Request) {
         id: true,
         email: true,
         roles: {
-           select: {
-               role: true
-           }
+          select: {
+            role: true
+          }
         }
       },
     });

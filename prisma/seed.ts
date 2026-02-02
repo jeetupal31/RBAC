@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  const perms = ["manage_roles", "manage_permissions"];
+  const perms = ["manage_roles", "manage_permissions", "manage_users"];
 
   // Create permissions
   for (const p of perms) {

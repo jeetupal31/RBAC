@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import Modal from "@/components/Modal";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface Permission {
     id: string;
@@ -31,6 +32,10 @@ export default function RolesPage() {
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
     const [newRoleName, setNewRoleName] = useState("");
     const [selectedPermIds, setSelectedPermIds] = useState<Set<string>>(new Set());
+
+    // Delete Confirmation State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
 
     useEffect(() => {
         fetchRoles();
@@ -81,8 +86,14 @@ export default function RolesPage() {
         }
     }
 
-    const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure?")) return;
+    const confirmDelete = (id: string) => {
+        setRoleToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (!roleToDelete) return;
+        const id = roleToDelete;
         try {
             const token = localStorage.getItem("token");
             await fetch(`/api/roles/${id}`, {
@@ -215,7 +226,7 @@ export default function RolesPage() {
                                     Manage Permissions
                                 </button>
                                 <button className="text-sm font-medium text-red-600 hover:text-red-500 dark:text-red-400"
-                                    onClick={() => handleDelete(role.id)}
+                                    onClick={() => confirmDelete(role.id)}
                                 >
                                     Delete
                                 </button>
@@ -285,6 +296,18 @@ export default function RolesPage() {
                 </div>
             </Modal>
 
-        </div>
+
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+                title="Delete Role"
+                message="Are you sure you want to delete this role? This might affect users assigned to this role."
+                isDestructive={true}
+                confirmText="Delete"
+            />
+        </div >
     );
 }

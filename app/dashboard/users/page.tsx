@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/useAuth";
 import Modal from "@/components/Modal";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface Role {
     id: string;
@@ -29,6 +30,10 @@ export default function UsersPage() {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null); // null means create new
+
+    // Delete Confirmation State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<string | null>(null);
 
     // Form State
     const [email, setEmail] = useState("");
@@ -71,8 +76,14 @@ export default function UsersPage() {
         }
     }
 
-    const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure?")) return;
+    const confirmDelete = (id: string) => {
+        setUserToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (!userToDelete) return;
+        const id = userToDelete;
         try {
             const token = localStorage.getItem("token");
             await fetch(`/api/users/${id}`, {
@@ -190,7 +201,13 @@ export default function UsersPage() {
             </div>
 
             {loading ? (
-                <div className="text-center py-10">Loading users...</div>
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+                    <div className="p-6 space-y-4 animate-pulse">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={i} className="h-10 bg-gray-100 dark:bg-zinc-700 rounded w-full"></div>
+                        ))}
+                    </div>
+                </div>
             ) : error ? (
                 <div className="text-red-500">{error}</div>
             ) : (
@@ -246,7 +263,7 @@ export default function UsersPage() {
                                                 Edit
                                             </button>
                                             <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                onClick={() => handleDelete(user.id)}
+                                                onClick={() => confirmDelete(user.id)}
                                             >
                                                 Delete
                                             </button>
@@ -322,6 +339,16 @@ export default function UsersPage() {
                     </div>
                 </form>
             </Modal>
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDelete}
+                title="Delete User"
+                message="Are you sure you want to delete this user? This action cannot be undone."
+                isDestructive={true}
+                confirmText="Delete"
+            />
         </div>
     );
 }
