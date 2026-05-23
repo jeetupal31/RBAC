@@ -1,105 +1,81 @@
-# 🛡️ RBAC Admin Dashboard
+# RBAC — Role-Based Access Control
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Next.js](https://img.shields.io/badge/Next.js-15.0-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.0-cyan)
-![Prisma](https://img.shields.io/badge/Prisma-5.0-white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000?style=flat-square&logo=express&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
 
-> A powerful, secure, and modern **Role-Based Access Control (RBAC)** system built with Next.js 15, Prisma, and Tailwind CSS. Manage users, roles, and permissions with a beautiful, responsive interface.
+> A production-ready Role-Based Access Control system — users are assigned roles (admin, moderator, user), and every API route is protected by a permission-checking middleware.
 
----
+## Features
 
-## ✨ Features
+- 👤 **User management** — register, login, view profile
+- 🎭 **Role system** — `admin` / `moderator` / `user` with distinct permission sets
+- 🔒 **Route-level protection** — middleware guards every endpoint by required role
+- 🛡️ **JWT auth** — stateless token-based sessions, refresh token support
+- 🔑 **Permission matrix** — granular `can(action, resource)` checks
+- 📋 **Admin panel routes** — user listing, role assignment (admin only)
 
--   **🔐 Secure Authentication**: Robust login system with JWT-based session management.
--   **👥 User Management**: Create, view, update, and delete users effortlessly.
--   **🛡️ Role Management**: Define dynamic roles (e.g., Admin, Editor, Viewer) and assign them to users.
--   **🔑 Granular Permissions**: Fine-grained control over what roles can do (`manage_users`, `manage_roles`, etc.).
--   **🎨 Modern UI/UX**: Built with Tailwind CSS for a sleek, dark-mode ready design.
--   **⚡ High Performance**: Powered by Next.js App Router and Server Actions.
--   **🛠️ Developer Ready**: Type-safe database queries with Prisma ORM.
+## Role Permissions
 
-## 🚀 Tech Stack
+| Action | User | Moderator | Admin |
+|--------|------|-----------|-------|
+| Read own profile | ✅ | ✅ | ✅ |
+| Update own profile | ✅ | ✅ | ✅ |
+| Read all users | ❌ | ✅ | ✅ |
+| Delete users | ❌ | ❌ | ✅ |
+| Assign roles | ❌ | ❌ | ✅ |
+| Moderate content | ❌ | ✅ | ✅ |
 
--   **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
--   **Language**: [TypeScript](https://www.typescriptlang.org/)
--   **Database**: PostgreSQL
--   **ORM**: [Prisma](https://www.prisma.io/)
--   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
--   **Auth**: Custom JWT Auth (or NextAuth.js ready)
+## Architecture
 
-## 🛠️ Getting Started
+```
+Request
+   │
+JWT Middleware  (verify token → attach user)
+   │
+Role Middleware (check user.role against required role)
+   │
+Controller      (business logic)
+```
 
-Follow these steps to set up the project locally.
+## Tech Stack
 
-### Prerequisites
+| Layer | Tech |
+|-------|------|
+| Runtime | Node.js, TypeScript |
+| Framework | Express 5 |
+| Auth | JWT (access + refresh tokens) |
+| Hashing | bcrypt |
+| Validation | Zod |
 
--   Node.js 18+
--   PostgreSQL (Local or Cloud like Neon/Supabase)
+## API Endpoints
 
-### 1. Clone the Repository
+```
+POST   /auth/register          Public
+POST   /auth/login             Public
+GET    /auth/refresh           Public
+
+GET    /user/profile           User+
+PATCH  /user/profile           User+
+
+GET    /admin/users            Admin only
+PATCH  /admin/users/:id/role   Admin only
+DELETE /admin/users/:id        Admin only
+
+GET    /mod/content            Moderator+
+```
+
+## Local Setup
 
 ```bash
-git clone https://github.com/JeetuPalhub/RBAC.git
+git clone https://github.com/jeetupal31/RBAC.git
 cd RBAC
-```
-
-### 2. Install Dependencies
-
-```bash
 npm install
-```
-
-### 3. Configure Environment
-
-Create a `.env` file in the root directory and add your database URL and a secret for JWT:
-
-```env
-DATABASE_URL="postgresql://user:password@localhost:5432/rbac?schema=public"
-JWT_SECRET="your-super-secret-key-change-me"
-```
-
-### 4. Setup Database
-
-Run migrations and seed the database with an initial Admin user and default permissions.
-
-```bash
-# Push schema to database
-npx prisma migrate dev --name init
-
-# Seed the database (Default: admin@example.com / password)
-npm run prisma:seed
-```
-
-### 5. Run the Application
-
-```bash
+cp .env.example .env   # JWT_SECRET, DATABASE_URL
 npm run dev
 ```
 
-Visit `http://localhost:3000` in your browser.
-
-## 📦 Deployment
-
-Easily deploy to [Vercel](https://vercel.com/):
-
-1.  Push your code to GitHub.
-2.  Import the project into Vercel.
-3.  Add `DATABASE_URL` and `JWT_SECRET` to Environment Variables.
-4.  **Deploy!** (The postinstall script handles Prisma generation automatically).
-
-## 🔑 Default Credentials
-
-After seeding, use these credentials to log in:
-
--   **Email**: `admin@example.com`
--   **Password**: `password`
-
-## 🤝 Contributing
-
-Contributions are welcome! Please fork the repository and submit a pull request.
-
 ---
 
-Made with ❤️ by Jeetu Pal
+Made by [Jeetu Pal](https://github.com/jeetupal31)
