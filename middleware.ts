@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+// NOTE: Next.js middleware runs on the Edge runtime, which does NOT support
+// the Node `crypto`-based `jsonwebtoken` library. We use `jose`, which is
+// built on the Web Crypto API and works on the Edge.
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // 🔓 Public routes (auth not required)
@@ -20,18 +23,15 @@ export function middleware(req: NextRequest) {
     const authHeader = req.headers.get("authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { message: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const token = authHeader.split(" ")[1];
 
     try {
-      jwt.verify(token, JWT_SECRET);
+      await jwtVerify(token, JWT_SECRET);
       return NextResponse.next();
-    } catch (err) {
+    } catch {
       return NextResponse.json(
         { message: "Invalid or expired token" },
         { status: 401 }
